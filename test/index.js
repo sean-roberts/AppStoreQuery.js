@@ -1,16 +1,19 @@
 
 console.log('Start AppStoreQuery Testing');
 
+
 var appStore = require('../src/AppStoreQuery.js');
+
+
+
 
 appStore.query({
   term: 'angry birds',
-  limit: 2
+  limit: 20
 }, function(apps){
-  console.log(apps);
 
   apps.forEach(function(app, index){
-    console.log(app);
+    console.log(app.name);
   });
 
 });
