@@ -11,12 +11,16 @@ var appStore = require('../src/AppStoreQuery.js');
 
 appStore.query({
   term: 'b',
-  limit: 15
+  limit: 15,
+  rawResult: false
 }, function(queryData){
-  queryData.each(function(app, index){
+  console.log(queryData.responseTime);
+  /*queryData.data.forEach(function(app, index){
     console.log('apps starting with b: ', app.name);
-  });
+  });*/
 
+}, function fail(){
+  console.error('Failed to get the query data');
 });
 
 

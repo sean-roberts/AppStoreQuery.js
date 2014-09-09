@@ -1,4 +1,6 @@
 /**
+  @author Sean Roberts
+
   AppStoreQuery.js is a utility for querying the Apple App Store.
   This utility requires the request module for sending the GET request
   to the iTunes API enpoints.
@@ -11,16 +13,11 @@ var request = require('request');
 // Our formal response cnstr function
 // to make gathering information about the
 // apps easier
-var QueryData = function AppData( url, apps ){
-
+var QueryData = function AppData( url, apps, responseTime){
   this.source = 'This data is happily provided by Apple :)';
   this.url = url;
   this.data = apps || [];
-  this.each = function each(eachFunc){
-    this.data.forEach(function(app, index){
-      eachFunc(app, index);
-    });
-  };
+  this.responseTime = responseTime;
   this.first = function(){
     return this.data.length > 0 ? this.data[0] : undefined;
   }
@@ -37,11 +34,13 @@ var ITUNES_URL = 'http://itunes.apple.com/',
 
 
   // Handle sending the request to iTunes
-  get = function( url, cbSuccess, cbFail){
+  get = function( url, useRawResult, cbSuccess, cbFail){
 
     var start = new Date();
 
     request(url, function (error, response, body) {
+
+      var data;
 
       if(error){
         console.error('Unable to get app store data', error);
@@ -50,7 +49,16 @@ var ITUNES_URL = 'http://itunes.apple.com/',
       }
 
       if (!error && response.statusCode === 200) {
-        cbSuccess( new QueryData( url, processResponse(body), start ) );
+
+        // if the user wants to receive the raw response
+        // we can dump it to the callback directly, otherwise
+        // we will process the response into a friendlier version
+
+        data = useRawResult ?
+          body :
+          new QueryData( url, processResponse( body ), new Date() - start)
+
+        cbSuccess( data );
       }
     });
   },
@@ -63,9 +71,11 @@ var ITUNES_URL = 'http://itunes.apple.com/',
     var storeResponse = JSON.parse(data),
       apps = [];
 
+    // Do nothing if we have no results
     if(storeResponse.resultCount === 0){
       return;
     }
+
 
     // make sure the items are actually apps and not developers info
     storeResponse.results = storeResponse.results.filter(function(respItem){
@@ -196,7 +206,7 @@ module.exports = {
     var url = buildRequestFromQuery(query);
 
     if(url){
-      get(url, success, fail);
+      get(url, query && query.rawResult, success, fail);
     }else {
       console.error('Unable to parse query and build url');
     }
