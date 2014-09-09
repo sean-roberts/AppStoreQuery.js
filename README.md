@@ -42,8 +42,20 @@ contain all of the following properties but the `term` property is required.
 appStore.query({
   term: 'search term or id',
   limit: 10, // default is 50 range is 1-200,
-  country: 'US', //default is US
+  country: 'US' //default is US
 }, function success(queryData){
-  console.log('This query should get me all apps developed by PopCap');
+  console.log('Give me up to 10 results from my search term');
 });
+```
+
+Once you get your callback we will pass what we call a `QueryData` object.
+This object has the following signature:
+
+```javascript
+{
+  data : [], // this is your array of results
+  url : '', // the string url sent to the endpoints
+  first : function(){}, // returns the first item in the data set
+  last : function(){} // returns the last item in the data set
+}
 ```
