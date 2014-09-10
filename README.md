@@ -1,6 +1,10 @@
 # AppStoreQuery.js
-This a node.js utility for searching the Apple API endpoint for applications available in the App Store.
-The endpoints and data are provided by Apple.
+This a node.js utility for searching the Apple API endpoint for
+applications available in the App Store.
+The endpoints and data are provided by Apple. The goal for this
+project is to write a useful utility that makes gathering data
+about apps and aggregating that data easy.
+
 
 ## Dependency
 The only dependency used in the utility is the `npm request` module.
