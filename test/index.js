@@ -11,7 +11,8 @@ var appStore = require('../src/AppStoreQuery.js');
 
 appStore.query({
   term: 'b',
-  limit: 15,
+  country: '***',
+  limit: 1,
   rawResult: false
 }, function(queryData){
   console.log(queryData.responseTime);

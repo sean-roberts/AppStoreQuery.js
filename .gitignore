@@ -1,3 +1,6 @@
 
 ### Do not check in the local node modules ###
 node_modules/
+
+### Don't check in my local test
+test/index.js

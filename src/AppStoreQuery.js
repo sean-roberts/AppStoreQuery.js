@@ -10,7 +10,7 @@
 var request = require('request');
 
 
-// Our formal response cnstr function
+// Our foramal response cnstr function
 // to make gathering information about the
 // apps easier
 var QueryData = function AppData( url, apps, responseTime){
@@ -18,10 +18,10 @@ var QueryData = function AppData( url, apps, responseTime){
   this.url = url;
   this.data = apps || [];
   this.responseTime = responseTime;
-  this.first = function(){
+  this.first = function first(){
     return this.data.length > 0 ? this.data[0] : undefined;
-  }
-  this.last = function(){
+  };
+  this.last = function last(){
     return this.data.length > 0 ? this.data[this.data.length - 1] : undefined;
   };
 };
@@ -40,39 +40,64 @@ var ITUNES_URL = 'http://itunes.apple.com/',
 
     request(url, function (error, response, body) {
 
-      var data;
+      var data, parsedResponse;
 
-      if(error){
+      if(error || response.statusCode !== 200){
         console.error('Unable to get app store data', error);
-        cbFail && cbFail();
+        if(cbFail){
+          cbFail();
+        }
         return;
       }
 
-      if (!error && response.statusCode === 200) {
+      // Lets parse the response and see if iTunes passed an error
+      // Sometimes the response seems to be an unusable string
+      // we will try to parse it
+      try{
 
-        // if the user wants to receive the raw response
-        // we can dump it to the callback directly, otherwise
-        // we will process the response into a friendlier version
+        parsedResponse = JSON.parse(body);
 
-        data = useRawResult ?
-          body :
-          new QueryData( url, processResponse( body ), new Date() - start)
-
-        cbSuccess( data );
+      }catch(ex){
+        console.error(ex);
+        if(cbFail){
+          cbFail();
+        }
+        return;
       }
+
+
+      // Return and call the fail callback
+      if(parsedResponse && parsedResponse.errorMessage) {
+        console.error('iTunes returned error messages.', parsedResponse);
+        if(cbFail){
+          cbFail();
+        }
+        return;
+      }
+
+
+      // We have a valid response, if the user wants to receive the raw
+      // response we can dump it to the callback directly, otherwise
+      // we will process the response into a friendlier version
+      data = useRawResult ?
+        body :
+        new QueryData( url, processResponse( parsedResponse ), new Date() - start);
+
+      cbSuccess( data );
+
     });
   },
 
 
   // Handle taking the itunes data and putting it in a more
   // usable format for easier consumption
-  processResponse = function (data){
+  processResponse = function (storeResponse){
 
-    var storeResponse = JSON.parse(data),
-      apps = [];
+    var apps = [];
+
 
     // Do nothing if we have no results
-    if(storeResponse.resultCount === 0){
+    if(!storeResponse.resultCount){
       return;
     }
 
@@ -168,7 +193,7 @@ var ITUNES_URL = 'http://itunes.apple.com/',
         return;
       }
 
-      term = query.term;
+      term = query.term.toString();
       country = query.country || 'US';
       limit = query.limit || 50;
       // enforce the itunes limit of 200 items per response
@@ -176,8 +201,8 @@ var ITUNES_URL = 'http://itunes.apple.com/',
     }
 
     // Handle the query being passed as a string that should be searched on
-    if(typeof query === 'string'){
-      term = query;
+    if(typeof query === 'string' || !isNaN(query)){
+      term = query.toString();
     }
 
     // Given the term, see if it is an app id that is being searched for
