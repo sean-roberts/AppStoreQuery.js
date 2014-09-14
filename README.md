@@ -158,3 +158,9 @@ Apple result values would be if you use the raw result form.
 If you want to learn more about the raw values and endpoints from Apple,
 check out the following Apple resource documentation: <br>
 https://www.apple.com/itunes/affiliates/resources/documentation/itunes-store-web-service-search-api.html
+
+
+##Endpoint Courtesy
+The data tied to App Store apps are not updated very frequently and it
+is highly recommended that you architect your solution to cache
+the results of your queries for as long as makes sense for your apps.
